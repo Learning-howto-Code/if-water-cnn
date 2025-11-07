@@ -1,3 +1,5 @@
+# ignore errors in the imports
+#SSH at (venv) Abrahams-MacBook-Pro:if_water abrahamhopkins$ 
 import numpy as np
 import matplotlib as plt
 import keras
@@ -14,7 +16,7 @@ val_path= "/Users/abrahamhopkins/Downloads/Jakes_Model/if_water/val"
 
 
 datagen= ImageDataGenerator(rescale=1./255)
-# Data generators
+#prepares imgs for training
 batch_size = 32
 image_size = (224, 224)
 class_mode = 'binary'
@@ -35,7 +37,7 @@ valid_data = datagen.flow_from_directory(
     seed=42
 )
 
-# Create a CNN model
+# CNN Layers
 model = tf.keras.Sequential([
     tf.keras.layers.Conv2D(10, (3, 3), activation="relu", input_shape=(224, 224, 3)),
     tf.keras.layers.Conv2D(10, (3, 3), activation="relu"),
@@ -48,6 +50,7 @@ model = tf.keras.Sequential([
 ])
 model.compile(loss="binary_crossentropy", optimizer=tf.keras.optimizers.Adam(), metrics=["accuracy"])
 
-# Fit the model
+# Trains the model
 epochs = 5
 history_1 = model.fit(train_data, epochs=epochs, validation_data=valid_data, validation_steps=len(valid_data))
+model.save("model.keras")
