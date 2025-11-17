@@ -37,6 +37,31 @@ valid_data = datagen.flow_from_directory(
     seed=42
 )
 
+def stack_frames_generator(base_gen, frames_per_sample=5):
+    while True:
+        # Fetch frames_per_sample * batch_size images from the base generator
+        imgs = []
+        labels = []
+        for _ in range(frames_per_sample):
+            x, y = next(base_gen)
+            imgs.append(x)
+            labels.append(y)
+
+        # x has shape (batch_size, H, W, 3)
+        # We want to stack along channel axis per item
+        imgs = np.stack(imgs, axis=1)  # (batch_size, 5, H, W, 3)
+
+        # Merge the frame and channel dimensions → (batch_size, H, W, 5*3)
+        b, f, h, w, c = imgs.shape
+        imgs = imgs.reshape(b, h, w, f*c)
+
+        # You MUST ensure labels match. If all 5 frames belong to same class, use labels[0]
+        labels = labels[0]
+
+        yield imgs, labels
+stacked_train = stack_frames_generator(train_data, frames_per_sample=5)
+stacked_valid = stack_frames_generator(valid_data, frames_per_sample=5)
+
 # CNN Layers
 model = tf.keras.Sequential([
     tf.keras.layers.Conv2D(10, (3, 3), activation="relu", input_shape=(224, 224, 3)),
@@ -51,6 +76,13 @@ model = tf.keras.Sequential([
 model.compile(loss="binary_crossentropy", optimizer=tf.keras.optimizers.Adam(), metrics=["accuracy"])
 
 # Trains the model
-epochs = 5
-history_1 = model.fit(train_data, epochs=epochs, validation_data=valid_data, validation_steps=len(valid_data))
+
+model.fit(
+    stacked_train,
+    steps_per_epoch=train_data.samples // batch_size,
+    validation_data=stacked_valid,
+    validation_steps=valid_data.samples // batch_size,
+    epochs=5
+)
+
 model.save("model.keras")
