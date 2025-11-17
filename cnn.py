@@ -11,7 +11,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 path_to_folder = "/Users/jakehopkins/Downloads/if_water"
 # Filepaths
-train_path= "/Users/abrahamhopkins/Downloads/Jakes_Model/still_images/still_images"
+train_path= "//Users/abrahamhopkins/Downloads/Jakes_Model/if_water/train"
 val_path= "/Users/abrahamhopkins/Downloads/Jakes_Model/if_water/val"
 
 

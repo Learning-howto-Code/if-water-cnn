@@ -10,9 +10,7 @@ Usage examples:
   python move_fraction.py /path/to/source /path/to/dest
   python move_fraction.py /src /dst --fraction 0.2 --seed 42 --pattern "*.jpg" --dry-run
 
-"""
-
-import os
+  """
 import shutil
 import random
 import argparse
@@ -20,6 +18,7 @@ import fnmatch
 import math
 import logging
 import sys
+import os
 
 
 def collect_files(src_dir: str, pattern: str = None, recursive: bool = False):
