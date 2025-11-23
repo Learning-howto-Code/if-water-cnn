@@ -38,7 +38,7 @@ def test_pic():
     prediction = interpreter.get_tensor(output_details[0]["index"])
     print(prediction)
     return prediction
-x = 5
+x = 0
 while x < 5:
     sleep(0.2)
     test_pic()
