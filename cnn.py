@@ -37,3 +37,26 @@ valid_data = datagen.flow_from_directory(
     class_mode=class_mode,
     seed=42
 )
+
+model = Sequential([
+    Conv2D(16, (3,3), activation='relu', input_shape=(224,224,3)),
+    MaxPooling2D(),
+    Conv2D(32, (3,3), activation='relu'),
+    MaxPooling2D(),
+    Flatten(),
+    Dense(64, activation='relu'),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(
+    optimizer='adam',
+    loss='binary_crossentropy',
+    metrics=['accuracy']
+)
+history = model.fit(
+    train_data,
+    validation_data=valid_data,
+    epochs=5
+)
+
+model.save("model.keras")
