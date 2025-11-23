@@ -28,9 +28,6 @@ def test_pic():
     # Resize + normalize
     img = cv2.resize(frame, (w, h))
     img = img.astype(np.float32) / 255.0
-    img = np.expand_dims(img, axis=0)
-
-    # Send input to TFLite model
     interpreter.set_tensor(input_details[0]["index"], img)
     interpreter.invoke()
 
