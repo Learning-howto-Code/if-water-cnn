@@ -2,4 +2,5 @@
 .vscode/
 README_move_fraction.md
 val/
+train/
 test.py

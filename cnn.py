@@ -59,4 +59,4 @@ history = model.fit(
     epochs=5
 )
 
-model.save("model.keras")
+model.save("model.h5")
