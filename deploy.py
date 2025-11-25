@@ -3,6 +3,8 @@ from time import sleep
 import numpy as np
 import cv2
 import tflite_runtime.interpreter as tflite
+import sys
+from pi5neo import Pi5Neo
 
 
 interpreter = tflite.Interpreter(model_path="model.tflite")
@@ -22,6 +24,18 @@ config = picam2.create_video_configuration(main={"size": (w, h)}, buffer_count=4
 picam2.configure(config)
 picam2.start()
 
+#sets up led ring
+SPI_DEVICE = '/dev/spidev0.0' # Rpi protocol to get the timing right for the GPIOs
+SPI_SPEED_KHZ = 800 #speed of SPI protocol
+
+neo = Pi5Neo(SPI_DEVICE, 30, SPI_SPEED_KHZ)
+
+# Fill the strip with white (R,G,B = 255,255,255)
+neo.fill_strip(255, 255, 255)
+neo.update_strip()  # commit/send to LEDs
+sleep(1)
+neo.fill_strip(0, 0, 0)
+neo.update_strip() 
 
 def test_pic():
     frame = picam2.capture_array()
