@@ -26,18 +26,23 @@ picam2.start()
 def test_pic():
     frame = picam2.capture_array()
 
-    # Resize + normalize
-    img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) #changes from picam BGR to RGB
-    img = cv2.resize(frame, (w, h))
+    # Convert BGR→RGB, then resize
+    img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    img = cv2.resize(img, (w, h))
+
+    # Normalize
     img = img.astype("float32") / 255.0
-    img = np.expand_dims(img, axis=0)   # now (1, 224, 224, 3)
+
+    # Add batch dimension → (1, 224, 224, 3)
+    img = np.expand_dims(img, axis=0)
+
     interpreter.set_tensor(input_details[0]["index"], img)
     interpreter.invoke()
 
-    # Read output
     prediction = interpreter.get_tensor(output_details[0]["index"])
     print(prediction)
     return prediction
+
 x = 0
 while x < 5:
     sleep(0.2)
