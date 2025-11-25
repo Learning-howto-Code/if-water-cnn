@@ -15,6 +15,7 @@ output_details = interpreter.get_output_details()
 h = input_details[0]["shape"][1]
 w = input_details[0]["shape"][2]
 
+
 #sets up camera 
 picam2 = Picamera2()
 config = picam2.create_video_configuration(main={"size": (w, h)}, buffer_count=4)
@@ -26,9 +27,10 @@ def test_pic():
     frame = picam2.capture_array()
 
     # Resize + normalize
+    img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) #changes from picam BGR to RGB
     img = cv2.resize(frame, (w, h))
-    img = img.astype(np.float32) / 255.0
-    img = np.expand_dims(img, axis=0)
+    img = img.astype("float32") / 255.0
+    img = np.expand_dims(img, axis=0)   # now (1, 224, 224, 3)
     interpreter.set_tensor(input_details[0]["index"], img)
     interpreter.invoke()
 
