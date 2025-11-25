@@ -3,19 +3,20 @@ import argparse
 import os
 
 def convert(model_path, output_path, quantize=False):
-    # Load the Keras model
-    model = tf.keras.models.load_model(model_path)
+    # Detect model type
+    if model_path.endswith(".h5"):
+        model = tf.keras.models.load_model(model_path)
+        converter = tf.lite.TFLiteConverter.from_keras_model(model)
 
-    # Create TFLite converter
-    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    else:
+        # Assume SavedModel directory
+        converter = tf.lite.TFLiteConverter.from_saved_model(model_path)
 
     if quantize:
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
 
-    # Convert model
     tflite_model = converter.convert()
 
-    # Write output .tflite file
     with open(output_path, "wb") as f:
         f.write(tflite_model)
 
@@ -23,13 +24,11 @@ def convert(model_path, output_path, quantize=False):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Convert .keras model to .tflite")
-    parser.add_argument("model_path", help="Path to input .keras model")
-    parser.add_argument("output_path", help="Path to output .tflite file")
-    parser.add_argument("--quantize", action="store_true",
-                        help="Enable dynamic range quantization")
+    parser = argparse.ArgumentParser(description="Convert model to .tflite")
+    parser.add_argument("model_path", help="Path to model (.h5 or SavedModel folder)")
+    parser.add_argument("output_path", help="Output .tflite path")
+    parser.add_argument("--quantize", action="store_true", help="Enable quantization")
 
     args = parser.parse_args()
 
-    # Run conversion
     convert(args.model_path, args.output_path, args.quantize)
