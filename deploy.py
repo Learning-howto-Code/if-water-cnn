@@ -33,7 +33,7 @@ neo = Pi5Neo(SPI_DEVICE, 30, SPI_SPEED_KHZ)
 # Fill the strip with white (R,G,B = 255,255,255)
 neo.fill_strip(255, 255, 255)
 neo.update_strip()  # commit/send to LEDs
-sleep(1)
+sleep(20)
 neo.fill_strip(0, 0, 0)
 neo.update_strip() 
 
