@@ -40,7 +40,13 @@ def test_pic():
     interpreter.invoke()
 
     prediction = interpreter.get_tensor(output_details[0]["index"])
+    print("closer to 0 = no water, closer to 1 = water")
+    if prediction > 0.5:
+        print(" No Water Detected")
+    else:
+        print("Water Detected")
     print(prediction)
+    
     return prediction
 
 x = 0
