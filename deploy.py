@@ -66,5 +66,5 @@ while x < 5:
     sleep(0.2)
     test_pic()
     x += 1
-neo.fill_strip(255, 255, 255)
+neo.fill_strip(0, 0, 0)
 neo.update_strip()  # commit/send to LEDs
