@@ -1,34 +1,73 @@
-import tensorflow as tf
-import argparse
 import os
+import numpy as np
+from PIL import Image
+import tensorflow as tf
 
-def convert(model_path, output_path, quantize=False):
-    # Detect model type
-    if model_path.endswith(".h5"):
-        model = tf.keras.models.load_model(model_path)
-        converter = tf.lite.TFLiteConverter.from_keras_model(model)
+# -------------------------
+# CONFIG
+# -------------------------
 
-    else:
-        # Assume SavedModel directory
-        converter = tf.lite.TFLiteConverter.from_saved_model(model_path)
+MODEL_PATH = "model.tflite"
+IMAGE_FOLDER = "production_data"        # folder containing images
+IMG_SIZE = (60, 60)            # change to match your model
+LABELS = ["water", "no_water"]    # edit if you have more classes
 
-    if quantize:
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
+# -------------------------
+# LOAD TFLITE MODEL
+# -------------------------
 
-    tflite_model = converter.convert()
+interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
+interpreter.allocate_tensors()
 
-    with open(output_path, "wb") as f:
-        f.write(tflite_model)
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
-    print(f"Saved TFLite model to: {output_path}")
+# -------------------------
+# PREDICTION FUNCTION
+# -------------------------
 
+def predict_image(img_path):
+    # Load image
+    img = Image.open(img_path).convert("RGB")
+    img = img.resize(IMG_SIZE)
+
+    # Convert to array
+    arr = np.array(img, dtype=np.float32)
+
+    # Normalize if model expects float input
+    if input_details[0]["dtype"] == np.float32:
+        arr = arr / 255.0
+
+    # Add batch dimension
+    arr = np.expand_dims(arr, axis=0)
+
+    # Run inference
+    interpreter.set_tensor(input_details[0]["index"], arr)
+    interpreter.invoke()
+    output = interpreter.get_tensor(output_details[0]["index"])[0]
+
+    # Top prediction index
+    idx = np.argmax(output)
+    confidence = output[idx]
+
+    return idx, confidence
+
+# -------------------------
+# LOOP THROUGH ALL IMAGES
+# -------------------------
+
+def run_folder(folder):
+    for filename in os.listdir(folder):
+        if filename.lower().endswith((".png", ".jpg", ".jpeg")):
+            path = os.path.join(folder, filename)
+            idx, conf = predict_image(path)
+
+            label = LABELS[idx] if idx < len(LABELS) else f"class_{idx}"
+            print(f"{filename}: {label} ({conf:.4f})")
+
+# -------------------------
+# RUN
+# -------------------------
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Convert model to .tflite")
-    parser.add_argument("model_path", help="Path to model (.h5 or SavedModel folder)")
-    parser.add_argument("output_path", help="Output .tflite path")
-    parser.add_argument("--quantize", action="store_true", help="Enable quantization")
-
-    args = parser.parse_args()
-
-    convert(args.model_path, args.output_path, args.quantize)
+    run_folder(IMAGE_FOLDER)
