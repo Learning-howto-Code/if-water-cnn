@@ -2,19 +2,14 @@ import os
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-
-# -------------------------
-# CONFIG
-# -------------------------
+from sklearn.metrics import confusion_matrix
 
 MODEL_PATH = "model.tflite"
-IMAGE_FOLDER = "production_data"        # folder containing images
-IMG_SIZE = (60, 60)            # change to match your model
-LABELS = ["water", "no_water"]    # edit if you have more classes
+IMAGE_FOLDER = "images"
 
-# -------------------------
-# LOAD TFLITE MODEL
-# -------------------------
+IMG_SIZE = (224, 224)
+LABELS = ["clean", "dirty"]     # adjust as needed
+TRUE_CLASS = 0                 # all images belong to "clean" class
 
 interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
@@ -22,52 +17,42 @@ interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-# -------------------------
-# PREDICTION FUNCTION
-# -------------------------
-
 def predict_image(img_path):
-    # Load image
     img = Image.open(img_path).convert("RGB")
     img = img.resize(IMG_SIZE)
 
-    # Convert to array
     arr = np.array(img, dtype=np.float32)
-
-    # Normalize if model expects float input
     if input_details[0]["dtype"] == np.float32:
         arr = arr / 255.0
 
-    # Add batch dimension
-    arr = np.expand_dims(arr, axis=0)
+    arr = np.expand_dims(arr, 0)
 
-    # Run inference
     interpreter.set_tensor(input_details[0]["index"], arr)
     interpreter.invoke()
     output = interpreter.get_tensor(output_details[0]["index"])[0]
 
-    # Top prediction index
-    idx = np.argmax(output)
-    confidence = output[idx]
-
-    return idx, confidence
-
-# -------------------------
-# LOOP THROUGH ALL IMAGES
-# -------------------------
+    return np.argmax(output)
 
 def run_folder(folder):
+    y_true = []
+    y_pred = []
+
     for filename in os.listdir(folder):
         if filename.lower().endswith((".png", ".jpg", ".jpeg")):
             path = os.path.join(folder, filename)
-            idx, conf = predict_image(path)
 
-            label = LABELS[idx] if idx < len(LABELS) else f"class_{idx}"
-            print(f"{filename}: {label} ({conf:.4f})")
+            pred = predict_image(path)
 
-# -------------------------
-# RUN
-# -------------------------
+            y_true.append(TRUE_CLASS)
+            y_pred.append(pred)
+
+            print(f"{filename}: predicted {pred}")
+
+    return y_true, y_pred
 
 if __name__ == "__main__":
-    run_folder(IMAGE_FOLDER)
+    y_true, y_pred = run_folder(IMAGE_FOLDER)
+
+    cm = confusion_matrix(y_true, y_pred)
+    print("\nCONFUSION MATRIX")
+    print(cm)
