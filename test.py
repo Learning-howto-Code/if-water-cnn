@@ -5,7 +5,7 @@ import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 
 MODEL_PATH = "model.tflite"
-IMAGE_FOLDER = "images"
+IMAGE_FOLDER = "test/"
 
 IMG_SIZE = (224, 224)
 LABELS = ["clean", "dirty"]     # adjust as needed
@@ -37,18 +37,28 @@ def run_folder(folder):
     y_true = []
     y_pred = []
 
-    for filename in os.listdir(folder):
-        if filename.lower().endswith((".png", ".jpg", ".jpeg")):
-            path = os.path.join(folder, filename)
+    label_map = {"no_water": 0, "water": 1}
 
-            pred = predict_image(path)
+    for root, _, files in os.walk(folder):
+        folder_name = os.path.basename(root)
+        if folder_name not in label_map:
+            continue
 
-            y_true.append(TRUE_CLASS)
-            y_pred.append(pred)
+        true_label = label_map[folder_name]
 
-            print(f"{filename}: predicted {pred}")
+        for filename in files:
+            if filename.lower().endswith((".png", ".jpg", ".jpeg")):
+                path = os.path.join(root, filename)
+
+                pred = predict_image(path)
+
+                y_true.append(true_label)
+                y_pred.append(pred)
+
+                print(f"{path}: true {true_label}, predicted {pred}")
 
     return y_true, y_pred
+
 
 if __name__ == "__main__":
     y_true, y_pred = run_folder(IMAGE_FOLDER)

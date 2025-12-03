@@ -1,5 +1,5 @@
-input_path = "/path/to/video.mov"
-output_dir = "/path/to/output_frames"
+input_path = "/Users/jakehopkins/Downloads/production_water.MOV"
+output_dir = "/Users/jakehopkins/Downloads/if_water/production/water"
 
 import cv2
 import os
