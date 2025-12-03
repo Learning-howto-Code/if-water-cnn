@@ -31,7 +31,8 @@ def predict_image(img_path):
     interpreter.invoke()
     output = interpreter.get_tensor(output_details[0]["index"])[0]
 
-    return np.argmax(output)
+    return 1 if output[0] > 0.5 else 0
+
 
 def run_folder(folder):
     y_true = []
