@@ -7,6 +7,7 @@ from keras.layers import *
 from keras.models import *
 from keras.preprocessing import image
 import tensorflow as tf
+from tensorflow.keras import layers
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 path_to_folder = "/Users/jakehopkins/Downloads/if_water"
@@ -38,26 +39,28 @@ valid_data = datagen.flow_from_directory(
     seed=42
 )
 
-data_augmentation = tf.keras.Sequential([ # heavy augmenttion to try to stop overfiting
+data_augmentation = tf.keras.Sequential([
     layers.RandomFlip("horizontal"),
-    layers.RandomRotation(0.25),
-    layers.RandomZoom(0.25),
+    layers.RandomRotation(0.1),
+    layers.RandomZoom(0.1),
     layers.RandomTranslation(0.1, 0.1),
     layers.RandomBrightness(factor=0.3),
     layers.RandomContrast(0.3),
-    layers.GaussianNoise(0.1),
-    layers.Resizing(256, 256),
-    layers.Resizing(224, 224),
-])
+    # layers.GaussianNoise(0.1),
+    # layers.Resizing(256, 256),
+    # layers.Resizing(224, 224),
+], name="data_augmentation")
+
 model = Sequential([
+    layers.Input(shape=(224, 224, 3)),   # define input once
     data_augmentation,
-    Conv2D(16, (3,3), activation='relu', input_shape=(224,224,3)),
-    MaxPooling2D(),
-    Conv2D(32, (3,3), activation='relu'),
-    MaxPooling2D(),
-    Flatten(),
-    Dense(64, activation='relu'),
-    Dense(1, activation='sigmoid')
+    layers.Conv2D(16, (3,3), activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Conv2D(32, (3,3), activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
 ])
 
 model.compile(
@@ -71,4 +74,4 @@ history = model.fit(
     epochs=5
 )
 
-model.save("model.h5")
+model.save("model.keras")
