@@ -38,7 +38,19 @@ valid_data = datagen.flow_from_directory(
     seed=42
 )
 
+data_augmentation = tf.keras.Sequential([ # heavy augmenttion to try to stop overfiting
+    layers.RandomFlip("horizontal"),
+    layers.RandomRotation(0.25),
+    layers.RandomZoom(0.25),
+    layers.RandomTranslation(0.1, 0.1),
+    layers.RandomBrightness(factor=0.3),
+    layers.RandomContrast(0.3),
+    layers.GaussianNoise(0.1),
+    layers.Resizing(256, 256),
+    layers.Resizing(224, 224),
+])
 model = Sequential([
+    data_augmentation,
     Conv2D(16, (3,3), activation='relu', input_shape=(224,224,3)),
     MaxPooling2D(),
     Conv2D(32, (3,3), activation='relu'),
