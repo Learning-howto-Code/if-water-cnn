@@ -4,40 +4,33 @@ from PIL import Image
 import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 
-MODEL_PATH = "model.tflite"
+MODEL_PATH = "model.h5"
 IMAGE_FOLDER = "test/"
 
 IMG_SIZE = (224, 224)
-LABELS = ["clean", "dirty"]     # adjust as needed
-TRUE_CLASS = 0                 # all images belong to "clean" class
 
-interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
-interpreter.allocate_tensors()
-
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+# Load Keras model
+model = tf.keras.models.load_model(MODEL_PATH)
 
 def predict_image(img_path):
     img = Image.open(img_path).convert("RGB")
     img = img.resize(IMG_SIZE)
 
-    arr = np.array(img, dtype=np.float32)
-    if input_details[0]["dtype"] == np.float32:
-        arr = arr / 255.0
-
+    arr = np.array(img, dtype=np.float32) / 255.0
     arr = np.expand_dims(arr, 0)
 
-    interpreter.set_tensor(input_details[0]["index"], arr)
-    interpreter.invoke()
-    output = interpreter.get_tensor(output_details[0]["index"])[0]
+    output = model.predict(arr, verbose=0)[0]
 
-    return 1 if output[0] > 0.5 else 0
+    # If model output is shape (1,) → binary classification
+    pred = 1 if output[0] > 0.5 else 0
+    return pred
 
 
 def run_folder(folder):
     y_true = []
     y_pred = []
 
+    # Adjust these to match folder names inside test/
     label_map = {"no_water": 0, "water": 1}
 
     for root, _, files in os.walk(folder):
