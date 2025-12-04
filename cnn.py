@@ -40,12 +40,12 @@ valid_data = datagen.flow_from_directory(
 )
 
 data_augmentation = tf.keras.Sequential([
-    layers.RandomFlip("horizontal"),
-    layers.RandomRotation(0.1),
+    # layers.RandomFlip("horizontal"),
+    # layers.RandomRotation(0.1),
     layers.RandomZoom(0.1),
     layers.RandomTranslation(0.1, 0.1),
-    layers.RandomBrightness(factor=0.3),
-    layers.RandomContrast(0.3),
+    layers.RandomBrightness(factor=0.1),
+    layers.RandomContrast(0.1),
     # layers.GaussianNoise(0.1),
     # layers.Resizing(256, 256),
     # layers.Resizing(224, 224),
