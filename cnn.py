@@ -46,14 +46,14 @@ data_augmentation = tf.keras.Sequential([
     layers.RandomTranslation(0.1, 0.1),
     layers.RandomBrightness(factor=0.1),
     layers.RandomContrast(0.1),
-    # layers.GaussianNoise(0.1),
+    # layers.GaussianNoise(0.1),nnao 
     # layers.Resizing(256, 256),
     # layers.Resizing(224, 224),
 ], name="data_augmentation")
 
 model = Sequential([
     layers.Input(shape=(224, 224, 3)),   # define input once
-    data_augmentation,
+    # data_augmentation,
     layers.Conv2D(16, (3,3), activation='relu'),
     layers.MaxPooling2D(),
     layers.Conv2D(32, (3,3), activation='relu'),
