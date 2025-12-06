@@ -60,7 +60,7 @@ data_augmentation = tf.keras.Sequential([
 
 model = Sequential([
     layers.Input(shape=(224, 224, 3)),   # define input once
-    # data_augmentation,
+    data_augmentation,
     layers.Conv2D(16, (3,3), activation='relu'),
     layers.MaxPooling2D(),
     layers.Conv2D(32, (3,3), activation='relu'),
@@ -82,3 +82,5 @@ history = model.fit(
 )
 
 model.save("model.keras")
+test_loss, test_acc = model.evaluate(test_data)
+print("Test accuracy:", test_acc)

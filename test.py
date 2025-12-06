@@ -4,7 +4,7 @@ from PIL import Image
 import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 
-MODEL_PATH = "model.h5"
+MODEL_PATH = "model.keras"
 IMAGE_FOLDER = "test/"
 
 IMG_SIZE = (224, 224)
